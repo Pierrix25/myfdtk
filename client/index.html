@@ -1,0 +1,125 @@
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+        html { height: 80% ; width: 80%}
+        body { height: 80%; margin: 0; padding: 0 }
+        #map-canvas { height: 100% ; width: 100%}
+    </style>
+    <script type="text/javascript"
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDhX-qoDaSbIBYqSykD3_nCE-hZylnfjtU&sensor=false">
+    </script>
+     <script type="text/javascript">
+  if (Meteor.isClient) {
+    
+//Session.set('myLat',-34.397);
+//Session.set('myLon',150.644);
+Session.set('myLat','?');
+Session.set('myLon','?');
+    
+    
+Template.location.helpers({
+  locationLat: function () {
+      console.log('helpers locationLat : myLat=' + Session.get('myLat') + ' myLon=' + Session.get('myLon'));
+        return Session.get('myLat');
+  },
+  locationLon: function () {
+      console.log('helpers locationLon : myLat=' + Session.get('myLat') + ' myLon=' + Session.get('myLon'));
+        return Session.get('myLon');
+  }
+});
+
+    function initialize() {
+/*      id = navigator.geolocation.watchPosition(success, error, options);
+      console.log('myLat=' + Session.get('myLat'),' myLon=' + Session.get('myLon'));
+      var mapOptions = {
+            center: new google.maps.LatLng(Session.get('myLat'), Session.get('myLon')),
+            zoom: 15,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        }; 
+        var map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+*/
+      navigator.geolocation.watchPosition(success, error, options);    
+      var mapOptions = {
+//      center: new google.maps.LatLng(-34.397, 150.644),
+      center: new google.maps.LatLng(Session.get('myLat'), Session.get('myLon')),
+      zoom: 11,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+      console.log('initialize : myLat=' + Session.get('myLat') + ' myLon=' + Session.get('myLon'));
+    this.map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+        // global flag saying we intialized already
+      console.log('initialize : after this map')
+     Session.set('map', true);
+    }
+
+    Template.test.rendered = function () {
+      console.log('rendered : myLat=' + Session.get('myLat') + ' myLon=' + Session.get('myLon'));
+        google.maps.event.addDomListener(window, 'load', initialize);
+        google.maps.event.trigger(window, 'load');
+    }
+
+    
+//    Template.location.rendered = function () {
+//      id = navigator.geolocation.watchPosition(success, error, options);
+//        google.maps.event.addDomListener(window, 'load', initialize);
+//        google.maps.event.trigger(window, 'load');
+//    }
+
+  function success(position) {
+  Session.set('myLat', position.coords.latitude);
+  Session.set('myLon', position.coords.longitude);
+  console.log('success : myLat=' + Session.get('myLat') + ' myLon=' + Session.get('myLon'));
+    console.log('set my coords done...');
+  }
+    
+function error(err) {
+  console.warn('ERROR(' + err.code + '): ' + err.message);
+};
+    
+options = {
+  enableHighAccuracy: false,
+  timeout: 120000,
+  maximumAge: 0
+};
+    
+    
+}
+      </script>
+</head>
+<body>
+ <div class="navbar navbar-inverse navbar-fixed-top">
+       <div class="navbar-inner">
+         <div class="container">
+           <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+
+           </button>
+           <a class="brand" href="#">My food truck</a>
+         </div>
+       </div>
+     </div>
+     <div class="container">
+       <BR/><BR/>
+       <h1>Login to continue</h1>
+       <p>{{> loginButtons}}</p>
+       <p>
+         {{#if currentUser}}
+           You are now logged in.
+         {{/if}}
+       </p>
+    </div>
+   {{> location}}
+{{> test}}
+</body>
+
+<template name="location">
+  <div>
+    Lat: {{locationLat}}
+  </div>
+  <div>
+    Lon: {{locationLon}}
+  </div>
+</template>
+
+<template name="test">
+  <div id="map-canvas"></div>
+</template>
