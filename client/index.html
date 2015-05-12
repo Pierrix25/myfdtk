@@ -6,8 +6,10 @@
     </style>
 
      <script type="text/javascript">
+	 
+ 
   if (Meteor.isClient) {
-    
+ 
 //Session.set('myLat',-34.397);
 //Session.set('myLon',150.644);
 Session.set('myLat','?');
@@ -80,6 +82,13 @@ options = {
        </p>
     </div>
    {{> location}}
+   
+{{#autoForm collection="Cities" type="insert"}}
+    {{> afQuickField name="name"}}
+    {{> afQuickField name="location"}}
+    <button type="submit" class="btn btn-primary">Insert</button>
+{{/autoForm}}
+
 </body>
 
 <template name="location">
