@@ -40,6 +40,15 @@ Template.aFoodTruck.helpers({
 		return '';
 	}
   },
+  
+  myId: function () {
+	if(myFdTk) {
+		return myFdTk._id;
+	} else {
+		return 0;
+	}
+  },
+
 
   theme: function () {
 	if(myFdTk) {
@@ -64,6 +73,19 @@ Template.aFoodTruck.helpers({
     return Session.get('myLon');
   }
 });
+
+Template.myMenu.helpers({
+  menuFormData: function () {
+    return {prefix: 'Menu', nom: myFdTk.nom, id: myFdTk._id};
+  }
+});
+
+Template.myLogo.helpers({
+  logoFormData: function () {
+    return {prefix: 'Logo', nom: myFdTk.nom, id: myFdTk._id};
+  }
+});
+
     function getLocation() {
 	  console.log('début getLocation : myLat=' + Session.get('myLat') + ' myLon=' + Session.get('myLon'));
       navigator.geolocation.watchPosition(success, error, options);    
@@ -129,6 +151,7 @@ options = {
     <h2>Bienvenue</h2>
     <form>
         <label>Nom :</label><input type="text" name="nom" value={{nom}}><br />
+        <label>Id :</label><input type="text" name="id" value={{myId}}><br />
         <label>Thème :</label><input type="text" name="theme" value={{theme}}><br />
         <label>Description</label><textarea name="description" value={{description}}></textarea><br />
 		<label>Mon emplacement actuel :</label>
@@ -139,9 +162,25 @@ options = {
 			Lon: {{locationLon}}
 		</div>        
   <button type="submit" >Enregistrer</button>
+  <p></p>
+		{{#if myId }}
+			{{> myMenu}}
+			{{> myLogo}}
+        {{/if}}
     </form>
 </template>
 
+<template name="myMenu">
+		<div>
+			Menu: {{> upload_bootstrap contentType='images' fileTypes='.jpg' formData=menuFormData }}
+		</div>  
+</template>
+
+<template name="myLogo">
+		<div>
+			Logo: {{> upload_bootstrap contentType='images' fileTypes='.jpg' formData=logoFormData }}
+		</div>  
+</template>
 
 <template name="location">
   <div>
