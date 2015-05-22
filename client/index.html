@@ -2,7 +2,7 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <style type="text/css">
         html { height: 80% ; width: 80%}
-        body { height: 80%; margin: 0; padding: 0 }
+        body { height: 80%; margin: 20; padding: 0 }
     </style>
 
      <script type="text/javascript">
@@ -31,6 +31,39 @@ Template.location.helpers({
   }
 });
 
+Template.aFoodTruck.helpers({
+  nom: function () {
+	myFdTk=FoodTrucks.findOne({truckerId : Meteor.userId()});
+	if(myFdTk) {
+		return myFdTk.nom;
+	} else {
+		return '';
+	}
+  },
+
+  theme: function () {
+	if(myFdTk) {
+		return myFdTk.theme;
+	} else {
+		return '';
+	}
+  },
+
+  description: function () {
+	if(myFdTk) {
+		return myFdTk.description;
+	} else {
+		return '';
+	}
+  },
+  
+  locationLat: function () {
+    return Session.get('myLat');
+  },
+  locationLon: function () {
+    return Session.get('myLon');
+  }
+});
     function getLocation() {
 	  console.log('début getLocation : myLat=' + Session.get('myLat') + ' myLon=' + Session.get('myLon'));
       navigator.geolocation.watchPosition(success, error, options);    
@@ -55,6 +88,11 @@ options = {
   maximumAge: 0
 };
 
+  Template.truckerboard.helpers({
+    foodtruckers: function () {
+      return FoodTrucks.find({}, { sort: { nom: 1 } });
+    }
+  });
 }
       </script>
 </head>
@@ -71,16 +109,39 @@ options = {
      </div>
      <div class="container">
        <BR/><BR/>
-       <h1>Login to continue</h1>
-       <p>{{> loginButtons}}</p>
        <p>
-         {{#if currentUser}}
-           You are now logged in.
+       {{#if currentUser}}
+			{{> aFoodTruck}}
+		{{else}}
+		<h1>Votre emplacement actuel :</h1>
+			{{> location}}
          {{/if}}
        </p>
     </div>
-   {{> location}}
+
+	{{> truckerboard}}
+       <h5>Truckers : Connectez-vous pour enregistrer la position de votre foodtruck</h5>
+       <p>{{> loginButtons}}</p>
 </body>
+
+<template name="aFoodTruck">
+
+    <h2>Bienvenue</h2>
+    <form>
+        <label>Nom :</label><input type="text" name="nom" value={{nom}}><br />
+        <label>Thème :</label><input type="text" name="theme" value={{theme}}><br />
+        <label>Description</label><textarea name="description" value={{description}}></textarea><br />
+		<label>Mon emplacement actuel :</label>
+		<div>
+			Lat: {{locationLat}}
+		</div>
+		<div>
+			Lon: {{locationLon}}
+		</div>        
+  <button type="submit" >Enregistrer</button>
+    </form>
+</template>
+
 
 <template name="location">
   <div>
@@ -90,5 +151,17 @@ options = {
     Lon: {{locationLon}}
   </div>
 </template>
+
+<template name="truckerboard">
+    <h3>Liste des foodtruckers inscrits</h3>
+    <ul>
+    {{#each foodtruckers}}
+        <li><b>{{ nom }}</b>,  <em>{{ theme }}</em> <p> {{ description }} </p> 
+		<p>situé : lon {{ lon  }} lat {{ lat }}</p>
+		</li>
+    {{/each}}
+    </ul>
+</template>
+
 
 
