@@ -71,7 +71,31 @@ Template.aFoodTruck.helpers({
   },
   locationLon: function () {
     return Session.get('myLon');
+  },
+
+  logo: function () {
+		if(myFdTk) {
+			return myFdTk.logo;
+		} else {
+			return '';
+		}
+  },
+  menu: function () {
+		if(myFdTk) {
+			return myFdTk.menu;
+		} else {
+			return '';
+		}
+  },
+  truck: function () {
+		if(myFdTk) {
+			return myFdTk.truck;
+		} else {
+			return '';
+		}
   }
+
+
 });
 
 Template.myMenu.helpers({
@@ -83,6 +107,12 @@ Template.myMenu.helpers({
 Template.myLogo.helpers({
   logoFormData: function () {
     return {prefix: 'Logo', nom: myFdTk.nom, id: myFdTk._id};
+  }
+});
+
+Template.myTruck.helpers({
+  truckFormData: function () {
+    return {prefix: 'Truck', nom: myFdTk.nom, id: myFdTk._id};
   }
 });
 
@@ -129,21 +159,25 @@ options = {
          </div>
        </div>
      </div>
+       {{#if noUser}}
+		  <h5>Truckers : Connectez-vous pour enregistrer la position de votre foodtruck</h5>
+         {{/if}}
+	      <div>{{> loginButtons}}</div>
+
      <div class="container">
-       <BR/><BR/>
+       <br><br>
        <p>
        {{#if currentUser}}
 			{{> aFoodTruck}}
 		{{else}}
 		<h1>Votre emplacement actuel :</h1>
 			{{> location}}
+			{{> truckerboard}}
          {{/if}}
        </p>
     </div>
 
-	{{> truckerboard}}
-       <h5>Truckers : Connectez-vous pour enregistrer la position de votre foodtruck</h5>
-       <p>{{> loginButtons}}</p>
+
 </body>
 
 <template name="aFoodTruck">
@@ -151,7 +185,6 @@ options = {
     <h2>Bienvenue</h2>
     <form>
         <label>Nom :</label><input type="text" name="nom" value={{nom}}><br />
-        <label>Id :</label><input type="text" name="id" value={{myId}}><br />
         <label>Thème :</label><input type="text" name="theme" value={{theme}}><br />
         <label>Description</label><textarea name="description" value={{description}}></textarea><br />
 		<label>Mon emplacement actuel :</label>
@@ -164,23 +197,34 @@ options = {
   <button type="submit" >Enregistrer</button>
   <p></p>
 		{{#if myId }}
-			{{> myMenu}}
+		<label>Mon camion :</label><img src="/upload{{truck.path}}" width=30% height=30%><br/>
+			{{> myTruck}}
+		<label>Mon logo :</label><img src="/upload{{logo.path}}" width=30% height=30%><br/>
 			{{> myLogo}}
+		<label>Mon menu :</label><img src="/upload{{menu.path}}" width=30% height=30%><br/>
+			{{> myMenu}}
         {{/if}}
     </form>
 </template>
 
 <template name="myMenu">
 		<div>
-			Menu: {{> upload_bootstrap contentType='images' fileTypes='.jpg' formData=menuFormData }}
+			Menu: {{> upload_bootstrap contentType='images' fileTypes='.gif, .bmp, .png, .jpg' formData=menuFormData }}
 		</div>  
 </template>
 
 <template name="myLogo">
 		<div>
-			Logo: {{> upload_bootstrap contentType='images' fileTypes='.jpg' formData=logoFormData }}
+			Logo: {{> upload_bootstrap contentType='images' fileTypes='.gif, .bmp, .png, .jpg' formData=logoFormData }}
 		</div>  
 </template>
+
+<template name="myTruck">
+		<div>
+			Mon camion: {{> upload_bootstrap contentType='images' fileTypes='.gif, .bmp, .png, .jpg' formData=truckFormData }}
+		</div>  
+</template>
+
 
 <template name="location">
   <div>
@@ -193,13 +237,17 @@ options = {
 
 <template name="truckerboard">
     <h3>Liste des foodtruckers inscrits</h3>
+	<div>
     <ul>
     {{#each foodtruckers}}
-        <li><b>{{ nom }}</b>,  <em>{{ theme }}</em> <p> {{ description }} </p> 
-		<p>situé : lon {{ lon  }} lat {{ lat }}</p>
+        <li><b>{{ nom }}</b>,  <em>{{ theme }}</em> <p> {{ description }} </p> <p>situé : lon {{ lon  }} lat {{ lat }} </p> 
+		<div class="thumb"> <a href="#"><img src="/upload{{truck.path}}" ></a></div>
+		<div class="thumb"> <a href="#"><img src="/upload{{logo.path}}" ></a></div>
+		<div class="thumb"> <a href="#"><img src="/upload{{menu.path}}" ></a></div>
 		</li>
     {{/each}}
     </ul>
+	</div>
 </template>
 
 
