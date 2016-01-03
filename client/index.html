@@ -12,6 +12,9 @@
 //Session.set('myLon',150.644);
 Session.set('myLat','?');
 Session.set('myLon','?');
+Session.set('signUp-visible', false);
+Session.set('majOk', false);
+
     
     
 Template.location.helpers({
@@ -33,10 +36,30 @@ Template.location.helpers({
 
 Template.aFoodTruck.helpers({
   nom: function () {
+	Session.set('truckImageUploaded', false);
+	Session.set('menuImageUploaded', false);
+	Session.set('logoImageUploaded', false);
 	myFdTk=FoodTrucks.findOne({truckerId : Meteor.userId()});
 	if(myFdTk) {
+if (myFdTk.truck) {
+if ((myFdTk.truck.path!='') ) {
+		Session.set('truckImageUploaded', myFdTk.truck.path);
+}
+};
+if (myFdTk.menu) {
+if (myFdTk.menu.path!='') {
+		Session.set('menuImageUploaded', myFdTk.menu.path);
+}
+};
+if (myFdTk.logo) {
+if (myFdTk.logo.path!='') {
+		Session.set('logoImageUploaded', myFdTk.logo.path);
+}
+};
+		Session.set('signUp-visible', true);
 		return myFdTk.nom;
 	} else {
+		Session.set('signUp-visible', false);
 		return '';
 	}
   },
@@ -93,27 +116,61 @@ Template.aFoodTruck.helpers({
 		} else {
 			return '';
 		}
-  }
-
+  },
+  truckExist: function () {
+		return Session.get('signUp-visible');
+ },
+  messageOk: function () {
+		return Session.get('majOk');
+ },
+  truckUploaded: function () {
+		return Session.get('truckImageUploaded');
+ },
+  logoUploaded: function () {
+		return Session.get('logoImageUploaded');
+ },
+  menuUploaded: function () {
+		return Session.get('menuImageUploaded');
+ }
 
 });
 
 Template.myMenu.helpers({
   menuFormData: function () {
-    return {prefix: 'Menu', nom: myFdTk.nom, id: myFdTk._id};
-  }
+   return {prefix: 'Menu', nom: myFdTk.nom, id: myFdTk._id};
+  },
+   myMenuCallbacks: function() {
+        return {
+            finished: function(index, fileInfo, context) { 				Session.set('menuImageUploaded', fileInfo.path);
+ 		}
+        }
+    }
 });
 
 Template.myLogo.helpers({
   logoFormData: function () {
     return {prefix: 'Logo', nom: myFdTk.nom, id: myFdTk._id};
-  }
+  },
+   myLogoCallbacks: function() {
+        return {
+            finished: function(index, fileInfo, context) { 				Session.set('logoImageUploaded', fileInfo.path);
+ 		}
+        }
+    }
+
 });
 
 Template.myTruck.helpers({
   truckFormData: function () {
-    return {prefix: 'Truck', nom: myFdTk.nom, id: myFdTk._id};
-  }
+	  return {prefix: 'Truck', nom: myFdTk.nom, id: myFdTk._id};
+  },
+   myTruckCallbacks: function() {
+        return {
+            finished: function(index, fileInfo, context) { 	
+			Session.set('truckImageUploaded', fileInfo.path);
+ 		}
+        }
+    }
 });
 
     function getLocation() {
@@ -159,17 +216,18 @@ options = {
          </div>
        </div>
      </div>
-       {{#if noUser}}
-		  <h5>Truckers : Connectez-vous pour enregistrer la position de votre foodtruck</h5>
-         {{/if}}
-	      <div>{{> loginButtons}}</div>
+
 
      <div class="container">
        <br><br>
        <p>
        {{#if currentUser}}
+			{{> loginButtons}}
 			{{> aFoodTruck}}
 		{{else}}
+		  <h5>Truckers : Connectez-vous pour enregistrer la position de votre foodtruck</h5>
+			{{> loginButtons}}
+
 		<h1>Votre emplacement actuel :</h1>
 			{{> location}}
 			{{> truckerboard}}
@@ -195,33 +253,52 @@ options = {
 			Lon: {{locationLon}}
 		</div>        
   <button type="submit" >Enregistrer</button>
-  <p></p>
-		{{#if myId }}
-		<label>Mon camion :</label><img src="/upload{{truck.path}}" width=30% height=30%><br/>
+      </form>
+{{#with messageOk}}
+<label>Modification effectuée</label>
+{{/with}}
+
+<p></p>
+
+{{#with truckExist }}
+<div id="listImages">
 			{{> myTruck}}
-		<label>Mon logo :</label><img src="/upload{{logo.path}}" width=30% height=30%><br/>
+	{{#with truckUploaded}}
+	<label>Mon camion :</label>
+<img src="/upload{{truckUploaded}}" width=30% height=30%>
+	{{/with}}
+<br/>
 			{{> myLogo}}
-		<label>Mon menu :</label><img src="/upload{{menu.path}}" width=30% height=30%><br/>
+	{{#with logoUploaded}}
+	<label>Mon logo :</label>
+	<img src="/upload{{logoUploaded}}" width=30% height=30%>	{{/with}}
+<br/>
 			{{> myMenu}}
-        {{/if}}
-    </form>
+	{{#with menuUploaded}}
+	<label>Mon menu :</label>
+	<img src="/upload{{menuUploaded}}" width=30% height=30%>	{{/with}}
+<br/>
+</div>
+{{/with}}
 </template>
+
+
 
 <template name="myMenu">
 		<div>
-			Menu: {{> upload_bootstrap contentType='images' fileTypes='.gif, .bmp, .png, .jpg' formData=menuFormData }}
+			Menu: {{> upload_bootstrap contentType='images' fileTypes='.gif, .bmp, .png, .jpg' formData=menuFormData callbacks=myMenuCallbacks}}
 		</div>  
 </template>
 
 <template name="myLogo">
 		<div>
-			Logo: {{> upload_bootstrap contentType='images' fileTypes='.gif, .bmp, .png, .jpg' formData=logoFormData }}
+			Logo: {{> upload_bootstrap contentType='images' fileTypes='.gif, .bmp, .png, .jpg' formData=logoFormData callbacks=myLogoCallbacks}}
 		</div>  
 </template>
 
 <template name="myTruck">
 		<div>
-			Mon camion: {{> upload_bootstrap contentType='images' fileTypes='.gif, .bmp, .png, .jpg' formData=truckFormData }}
+			Camion: {{> upload_bootstrap contentType='images' fileTypes='.gif, .bmp, .png, .jpg' formData=truckFormData callbacks=myTruckCallbacks}}
 		</div>  
 </template>
 
@@ -241,10 +318,21 @@ options = {
     <ul>
     {{#each foodtruckers}}
         <li><b>{{ nom }}</b>,  <em>{{ theme }}</em> <p> {{ description }} </p> <p>situé : lon {{ lon  }} lat {{ lat }} </p> 
-		<div class="thumb"> <a href="#"><img src="/upload{{truck.path}}" ></a></div>
-		<div class="thumb"> <a href="#"><img src="/upload{{logo.path}}" ></a></div>
-		<div class="thumb"> <a href="#"><img src="/upload{{menu.path}}" ></a></div>
+       {{#if truck.path}}
+		<img src="/upload{{truck.path}}" class="thumb">
+       {{/if}}
+       {{#if logo.path}}
+		<img src="/upload{{logo.path}}" class="thumb">
+       {{/if}}
+	  {{#if menu.path}}
+		<img src="/upload{{menu.path}}" class="thumb">
+	  {{/if}}
 		</li>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
     {{/each}}
     </ul>
 	</div>

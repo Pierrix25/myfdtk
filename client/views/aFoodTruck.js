@@ -1,5 +1,5 @@
 Template.aFoodTruck.events({
-    'submit form': function(e){
+	'submit form': function(e){
         e.preventDefault();
 //  console.log('aFoodTruck event !!!!!');
         
@@ -15,12 +15,16 @@ Template.aFoodTruck.events({
                 description: description,
                 lon: lon,
                 lat: lat,
-				truckerId: Meteor.userId()
+			truckerId: Meteor.userId()
         }
 		if (myFdTk) {
 			FoodTrucks.update({_id : myFdTk._id}, foodtruck, {upsert: true, multi: false,} );
+			Session.set('signUp-visible', true);
+			Session.set('majOk', true);
 		} else {
 			FoodTrucks.insert(foodtruck);
+			Session.set('signUp-visible', true);
+			Session.set('majOk', true);
 		}
     }
 });
