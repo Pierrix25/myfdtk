@@ -4,10 +4,12 @@
         html { height: 80% ; width: 80%}
         body { height: 80%; margin: 20; padding: 0 }
     </style>
+  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDhX-qoDaSbIBYqSykD3_nCE-hZylnfjtU&sensor=false"></script>
+
 
      <script type="text/javascript">
   if (Meteor.isClient) {
-    
+
 //Session.set('myLat',-34.397);
 //Session.set('myLon',150.644);
 Session.set('myLat','?');
@@ -15,19 +17,97 @@ Session.set('myLon','?');
 Session.set('signUp-visible', false);
 Session.set('majOk', false);
 
-    
+function initialize() {
+// Je définie les options de ma fonction
+
+  var mapOptions = {
+    zoom: 12,
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+  };
+
+// Je créé ma carte
+
+  map = new google.maps.Map(document.getElementById("map-canvas"),
+    mapOptions); 
+
+  // Je détermine ma fonction de géolocalisation en HTML5
+
+  if(navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      var pos = new google.maps.LatLng(position.coords.latitude,
+                                       position.coords.longitude);
+
+      var infowindow = new google.maps.InfoWindow({
+        map: map,
+        position: pos,
+        content: 'Je suis ici !'
+      });
+
+    var allFoodTrucks = FoodTrucks.find();
+    allFoodTrucks .forEach(function (foodTruck) {
+      var marker = new google.maps.Marker({
+        position: new google.maps.LatLng(foodTruck.lat, foodTruck.lon),
+        title: foodTruck.nom,
+        postId: foodTruck._id
+      });
+      marker.setMap(map);
+    });  
+
+
+// Je demande à ce que la carte soit centrée sur ma position
+
+      map.setCenter(pos);
+    }, 
+
+
+// Je détermine comment doit agir la carte si la géolocalisation n'est pas possible
+
+function() {
+      handleNoGeolocation(true);
+    });
+  } else {
+
+    handleNoGeolocation(false);
+  }
+}
+
+function handleNoGeolocation(errorFlag) {
+  if (errorFlag) {
+    var content = 'Erreur: Le service de géolocalisation ne fonctionne pas.';
+  } else {
+    var content = 'Erreur: Votre navigateur ne supporte pas la géolocalisation.';
+  }
+// Si la carte ne me géolocalise pas, elle va se positionner sur les points de latitude et longitude définis ci-dessous
+
+  var options = {
+    map: map,
+    position: new google.maps.LatLng(44.8333, 0.5667),
+    content: content
+  };
+
+  var infowindow = new google.maps.InfoWindow(options);
+  map.setCenter(options.position);
+}
+
+
+google.maps.event.addDomListener(window, 'load', initialize);
+
     
 Template.location.helpers({
   locationLat: function () {
     if(Session.get('myLat') === '?'){
-      getLocation();
-    }
+     console.log('locationlat helpers : avant getlocation');
+ getLocation();
+      console.log('locationlat helpers : après getlocation');
+   }
 	console.log('helpers locationLat : myLat=' + Session.get('myLat') + ' myLon=' + Session.get('myLon'));
     return Session.get('myLat');
   },
   locationLon: function () {
     if(Session.get('myLon') === '?'){
-      getLocation();
+      console.log('locationlon helpers : avant getlocation');
+     getLocation();
+      console.log('locationlon helpers : après getlocation');
     }      
 	console.log('helpers locationLon : myLat=' + Session.get('myLat') + ' myLon=' + Session.get('myLon'));
     return Session.get('myLon');
@@ -185,6 +265,7 @@ Template.myTruck.helpers({
   Session.set('myLon', position.coords.longitude);
   console.log('success : myLat=' + Session.get('myLat') + ' myLon=' + Session.get('myLon'));
     console.log('set my coords done...');
+    console.log('success : call rendered');
   }
     
 function error(err) {
@@ -193,7 +274,7 @@ function error(err) {
     
 options = {
   enableHighAccuracy: false,
-  timeout: 120000,
+  timeout: 360000,
   maximumAge: 0
 };
 
@@ -205,7 +286,7 @@ options = {
 }
       </script>
 </head>
-<body>
+<body onload="initialize()">
  <div class="navbar navbar-inverse navbar-fixed-top">
        <div class="navbar-inner">
          <div class="container">
@@ -234,6 +315,7 @@ options = {
          {{/if}}
        </p>
     </div>
+{{> mapPostsList}}
 
 
 </body>
@@ -337,6 +419,13 @@ options = {
     </ul>
 	</div>
 </template>
+
+<template name="mapPostsList">
+  <div id="map">
+    <div id="map-canvas"></div>
+  </div>
+</template>
+
 
 
 
