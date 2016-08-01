@@ -44,12 +44,13 @@ function initialize() {
       });
 
     var allFoodTrucks = FoodTrucks.find();
-    allFoodTrucks .forEach(function (foodTruck) {
+    allFoodTrucks.forEach(function (foodTruck) {
       var marker = new google.maps.Marker({
         position: new google.maps.LatLng(foodTruck.lat, foodTruck.lon),
         title: foodTruck.nom,
         postId: foodTruck._id
       });
+
       marker.setMap(map);
     });  
 
@@ -93,27 +94,6 @@ function handleNoGeolocation(errorFlag) {
 google.maps.event.addDomListener(window, 'load', initialize);
 
     
-Template.location.helpers({
-  locationLat: function () {
-    if(Session.get('myLat') === '?'){
-     console.log('locationlat helpers : avant getlocation');
- getLocation();
-      console.log('locationlat helpers : après getlocation');
-   }
-	console.log('helpers locationLat : myLat=' + Session.get('myLat') + ' myLon=' + Session.get('myLon'));
-    return Session.get('myLat');
-  },
-  locationLon: function () {
-    if(Session.get('myLon') === '?'){
-      console.log('locationlon helpers : avant getlocation');
-     getLocation();
-      console.log('locationlon helpers : après getlocation');
-    }      
-	console.log('helpers locationLon : myLat=' + Session.get('myLat') + ' myLon=' + Session.get('myLon'));
-    return Session.get('myLon');
-  }
-});
-
 Template.aFoodTruck.helpers({
   nom: function () {
 	Session.set('truckImageUploaded', false);
@@ -170,9 +150,21 @@ if (myFdTk.logo.path!='') {
   },
   
   locationLat: function () {
+    if(Session.get('myLat') === '?'){
+     console.log('locationlat helpers : avant getlocation');
+ getLocation();
+      console.log('locationlat helpers : après getlocation');
+   }
+	console.log('helpers locationLat : myLat=' + Session.get('myLat') + ' myLon=' + Session.get('myLon'));
     return Session.get('myLat');
   },
   locationLon: function () {
+    if(Session.get('myLon') === '?'){
+      console.log('locationlon helpers : avant getlocation');
+     getLocation();
+      console.log('locationlon helpers : après getlocation');
+    }      
+	console.log('helpers locationLon : myLat=' + Session.get('myLat') + ' myLon=' + Session.get('myLon'));
     return Session.get('myLon');
   },
 
@@ -308,9 +300,6 @@ options = {
 		{{else}}
 		  <h5>Truckers : Connectez-vous pour enregistrer la position de votre foodtruck</h5>
 			{{> loginButtons}}
-
-		<h1>Votre emplacement actuel :</h1>
-			{{> location}}
 			{{> truckerboard}}
          {{/if}}
        </p>
@@ -329,10 +318,10 @@ options = {
         <label>Description</label><textarea name="description" value={{description}}></textarea><br />
 		<label>Mon emplacement actuel :</label>
 		<div>
-			Lat: {{locationLat}}
+        <label>Lat :</label><textarea name="locationLat" value={{locationLat}}></textarea><br />
 		</div>
 		<div>
-			Lon: {{locationLon}}
+        <label>Lon :</label><textarea name="locationLon" value={{locationLon}}></textarea><br />
 		</div>        
   <button type="submit" >Enregistrer</button>
       </form>
@@ -385,21 +374,13 @@ options = {
 </template>
 
 
-<template name="location">
-  <div>
-    Lat: {{locationLat}}
-  </div>
-  <div>
-    Lon: {{locationLon}}
-  </div>
-</template>
 
 <template name="truckerboard">
     <h3>Liste des foodtruckers inscrits</h3>
 	<div>
     <ul>
     {{#each foodtruckers}}
-        <li><b>{{ nom }}</b>,  <em>{{ theme }}</em> <p> {{ description }} </p> <p>situÃ© : lon {{ lon  }} lat {{ lat }} </p> 
+        <li><b>{{ nom }}</b>  <em>{{ theme }}</em> <p> {{ description }} </p>  
        {{#if truck.path}}
 		<img src="/upload{{truck.path}}" class="thumb">
        {{/if}}
