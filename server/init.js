@@ -1,7 +1,7 @@
 Meteor.startup(function () {
   UploadServer.init({
-    tmpDir: 'c:/myfdtk/uploads/tmp',
-    uploadDir: 'c:/myfdtk/uploads/',
+    tmpDir: '/myfdtk/uploads/tmp',
+    uploadDir: '/myfdtk/uploads/',
 	maxFileSize: 5000000,
 	getFileName: function(file, formData) {
       return formData.nom+'_'+formData.prefix+'_'+file.name.split('.').shift()+'_'+formData.id+'.'+file.name.split('.').pop();
