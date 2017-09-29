@@ -1,6 +1,7 @@
 {
   "s3": {
     "key": "AKIAJ35ZGC2OFOJ55TTQ",
+    "secret": "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",
     "bucket": "myfoodtruck",
     "region": "Ireland",
     "cfdomain": "https://d1luz3ypsi69yt.cloudfront.net"

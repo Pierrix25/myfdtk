@@ -4,6 +4,8 @@ Template.aFoodTruck.events({
         var nom = $("input[name='nom']").val();
         var theme = $("input[name='theme']").val();
         var description = $("textarea[name='description']").val();
+        var locationLon = $("textarea[name='locationLon']").val();
+        var locationLat = $("textarea[name='locationLat']").val();
 	if (myFdTk) {
         var menu = myFdTk.menu;
 } else {
@@ -13,6 +15,8 @@ Template.aFoodTruck.events({
                 nom: nom,
                 theme: theme,
                 description: description,
+                locationLon: locationLon,
+                locationLat: locationLat,
 			menu: menu,
 			truckerId: Meteor.userId()
         }

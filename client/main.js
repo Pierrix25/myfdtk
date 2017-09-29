@@ -43,6 +43,25 @@ Template.aFoodTruck.helpers({
 	}
   },
   
+locationLat: function () {
+    if(Session.get('myLat') === '?'){
+     console.log('locationlat helpers : avant getlocation');
+ getLocation();
+      console.log('locationlat helpers : après getlocation');
+   }
+	console.log('helpers locationLat : myLat=' + Session.get('myLat') + ' myLon=' + Session.get('myLon'));
+    return Session.get('myLat');
+  },
+    
+  locationLon: function () {
+    if(Session.get('myLon') === '?'){
+      console.log('locationlon helpers : avant getlocation');
+     getLocation();
+      console.log('locationlon helpers : après getlocation');
+    }      
+	console.log('helpers locationLon : myLat=' + Session.get('myLat') + ' myLon=' + Session.get('myLon'));
+    return Session.get('myLon');
+  },
   menu: function () {
 		if(myFdTk) {
 			return myFdTk.menu;
@@ -135,6 +154,8 @@ Template.uploadForm.events({
                 theme= oneFoodTruck.theme;
                 description= oneFoodTruck.description;
                 menuImage= Images.findOne({_id : oneFoodTruck.menu});
+                lon= Images.findOne({_id : oneFoodTruck.locationLon});
+                lat= Images.findOne({_id : oneFoodTruck.locationLat});
 //                menuImage= Images.find();
                 thisTruck = new Array();
                 thisTruck['_id'] = id;
@@ -142,6 +163,8 @@ Template.uploadForm.events({
                 thisTruck['theme'] = theme;
                 thisTruck['description'] = description;
                 thisTruck['menuImage'] = menuImage;
+                thisTruck['locationLon'] = lon;
+                thisTruck['locationLat'] = lat;
 //                alert('thisTruck[nom]=' + thisTruck['nom'] );
 //                alert('menuImage.path=' + menuImage.path );
                 fdtk[i] = new Array();
