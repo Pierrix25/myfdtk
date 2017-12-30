@@ -1,7 +1,44 @@
+import { Meteor } from 'meteor/meteor';
 import { Template } from 'meteor/templating';
 import { ReactiveVar } from 'meteor/reactive-var';
+import { Session } from 'meteor/session';
+
+
+
+//Session.set('myLat',-34.397);
+//Session.set('myLon',150.644);
+Session.set('myLat','?');
+Session.set('myLon','?');
+Session.set('signUp-visible', false);
+Session.set('majOk', false);
 
 import './main.html';
+
+function getLocation() {
+	  console.log('dÃ©but getLocation : myLat=' + Session.get('myLat') + ' myLon=' + Session.get('myLon'));
+      navigator.geolocation.watchPosition(success, error, options);    
+	  console.log('fin getLocation : myLat=' + Session.get('myLat') + ' myLon=' + Session.get('myLon'));
+}
+
+  
+function success(position) {
+  Session.set('myLat', position.coords.latitude);
+  Session.set('myLon', position.coords.longitude);
+  console.log('success : myLat=' + Session.get('myLat') + ' myLon=' + Session.get('myLon'));
+    console.log('set my coords done...');
+    console.log('success : call rendered');
+}
+    
+function error(err) {
+  console.warn('ERROR(' + err.code + '): ' + err.message);
+};
+    
+options = {
+  enableHighAccuracy: false,
+  timeout: 360000,
+  maximumAge: 0
+};
+
 
 Template.aFoodTruck.helpers({
   nom: function () {
@@ -87,9 +124,78 @@ Template.uploadedFiles.helpers({
   }
 });
 
+
+ Template.mapPostsList.rendered = function () {
+   var mapOptions = {
+    zoom: 12,
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+  };
+
+// Je créé ma carte
+
+  map = new google.maps.Map(document.getElementById("map-canvas"),
+    mapOptions); 
+
+  // Je détermine ma fonction de géolocalisation en HTML5
+
+  if(navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      var pos = new google.maps.LatLng(position.coords.latitude,
+                                       position.coords.longitude);
+
+    console.log('rendered infowindow ');
+      var infowindow = new google.maps.InfoWindow({
+        map: map,
+        position: pos,
+        content: 'Je suis ici !'
+      });
+
+    console.log('rendered: allFoodTrucks ');
+//    allFoodTrucks = new Array();
+//   allFoodTrucks = FoodTrucks.find();
+//   FoodTrucks.find({}).forEach( function(foodTruck) {
+//    console.log('rendered: allFoodTrucks.count()= '+allFoodTrucks.length);
+//  var allFoodTrucks = Session.get('allFoodTrucks');
+        
+//    console.log('rendered: allFoodTrucks.count()= '+allFoodTrucks.count());
+//    allFoodTrucks.forEach(function (foodTruck) {
+   FoodTrucks.find({}).forEach( function(foodTruck) {
+       console.log('rendered: boucle foodTruck.nom = :'+foodTruck.nom);
+       var marker = new google.maps.Marker({
+        position: new google.maps.LatLng(foodTruck.locationLat, foodTruck.locationLon),
+        title: foodTruck.nom,
+        postId: foodTruck._id
+      });
+    
+    console.log('rendered: allFoodTrucks.forEach : foodTruck.nom = ' + foodTruck.nom + ' myLat=' +  foodTruck.locationLat + ' myLon=' + foodTruck.locationLon);
+    marker.setMap(map);
+    });  
+
+
+// Je demande à ce que la carte soit centrée sur ma position
+
+    console.log('setCenter ');
+      map.setCenter(pos);
+    }, 
+
+
+// Je détermine comment doit agir la carte si la géolocalisation n'est pas possible
+
+function() {
+      handleNoGeolocation(true);
+    });
+  } else {
+
+    handleNoGeolocation(false);
+  }
+ };
+
+
+
 Template.uploadForm.onCreated(function () {
   this.currentUpload = new ReactiveVar(false);
 });
+
 
 Template.uploadForm.helpers({
   currentUpload: function () {
@@ -141,6 +247,7 @@ Template.uploadForm.events({
 
   Template.truckerboard.helpers({
   truckerboard:   function () {
+        console.log('helpers: truckerboard');
         fdtk = new Array();
         i=0;
 //    var fdtkList = FoodTrucks.find({}, { sort: { nom: 1 } });
@@ -149,13 +256,14 @@ Template.uploadForm.events({
 //    alert('fdtkList=' + fdtkList.nom );
 //    for(var i=0; i<fdtkList.length; i++) {
     FoodTrucks.find({}).forEach( function(oneFoodTruck) {
+        console.log('helpers: boucle truckerboard :'+i);
                 id= oneFoodTruck._id;
                 nom= oneFoodTruck.nom;
                 theme= oneFoodTruck.theme;
                 description= oneFoodTruck.description;
                 menuImage= Images.findOne({_id : oneFoodTruck.menu});
-                lon= Images.findOne({_id : oneFoodTruck.locationLon});
-                lat= Images.findOne({_id : oneFoodTruck.locationLat});
+                lon= oneFoodTruck.locationLon;
+                lat= oneFoodTruck.locationLat;
 //                menuImage= Images.find();
                 thisTruck = new Array();
                 thisTruck['_id'] = id;
