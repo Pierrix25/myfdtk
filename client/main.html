@@ -1,0 +1,121 @@
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+        html { height: 80% ; width: 80%}
+        body { height: 80%; margin: 20; padding: 0 }
+    </style>
+  <title>My food truck</title>
+
+      <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDhX-qoDaSbIBYqSykD3_nCE-hZylnfjtU&sensor=false"></script>
+
+     <script type="text/javascript" >
+ 
+// google.maps.event.addDomListener(window, 'onloaded', initialize);
+// google.maps.event.addDomListener(document.getElementById("map"), 'load', initialize);
+
+</script>  
+    
+</head>
+
+<template name="accueil">
+  <h1>My food truck</h1>
+  <p>See <a href="https://github.com/VeliovGroup/Meteor-Files">ostrio:files</a></p>
+
+     <div class="container">
+       <br><br>
+       <p>
+       {{#if currentUser}}
+			{{> loginButtons}}
+			{{> aFoodTruck}}
+		{{else}}
+		  <h5>Truckers : Connectez-vous pour enregistrer la position de votre foodtruck</h5>
+			{{> loginButtons}}
+			{{> truckerboard}}
+         {{/if}}
+       </p>
+    {{> mapPostsList}}
+    </div>
+</template>
+
+<template name="aFoodTruck">
+
+    <h2>Bienvenue</h2>
+    <form>
+        <label>Nom :</label><input type="text" name="nom" value={{nom}}><br />
+        <label>ThÃ¨me :</label><input type="text" name="theme" value={{theme}}><br />
+        <label>Description</label><textarea name="description" value={{description}}></textarea><br />
+        <label>Longitude</label><textarea name="locationLon" value={{locationLon}}></textarea><br />
+        <label>Lattitude</label><textarea name="locationLat" value={{locationLat}}></textarea><br />
+     
+  <button type="submit" >Enregistrer</button>
+      </form>
+{{#with messageOk}}
+<label>Modification effectuée</label>
+{{/with}}
+
+<p>Vous pouvez prendre des photos de votre camion, de votre logo et de votre menu et les ajouter ici</p>
+
+
+<div id="listImages">
+
+			{{> myMenu}}
+</div>
+
+</template>
+
+<template name="myMenu">
+    <div>
+	   <label>Mon menu-1 :</label>
+        Menu: {{> uploadForm }}
+
+	{{#with menuUploaded}}
+	   <label>Mon menu-2 :</label>
+	   <img src={{menuUploaded.link}} class="thumb">	
+    {{/with}}
+    <br/>
+    </div>  
+</template>
+
+<template name="uploadForm">
+  {{#with currentUpload}}
+    Uploading <b>{{file.name}}</b>: 
+    <span id="progress">{{progress.get}}%</span>
+  {{else}}
+    <input id="fileInput" type="file" />
+    <p><small>Upload file in <code>jpeg</code> or <code>png</code> format, with size less or equal to 10MB</small></p>
+  {{/with}}
+</template>
+
+<template name="uploadedFiles">
+    <h3>-- Début de uploadedFiles</h3>
+  {{#if uploadedFiles.count}}
+      {{#each file in uploadedFiles.each}}
+  --          <p> {{ file.path }} </p> <p> {{ file.link }} </p> 
+            <a href="{{file.link}}?download=true" download="{{file.name}}">{{file.name}}</a>
+            <img src={{file.link}} class="thumb">
+        <br/>
+      {{/each}}
+  {{else}}
+    <div>No files uploaded, yet</div>
+  {{/if}}
+        <h3>-- Fin de uploadedFiles</h3>
+</template>
+
+<template name="truckerboard">
+    <h3>Liste des foodtruckers inscrits</h3>
+	<div>
+        <ul>
+    {{#each   truckerboard }}
+        <li><b>NOM : {{ nom }}</b>  <em> THEME : {{ theme }}</em> <p> DESC : {{ description }} </p> 
+            <img src={{menuImage.link}} class="thumb">
+        </li>
+      <br> <br> <br>  <br>      
+    {{/each}}
+    </ul>
+	</div>
+</template>
+<template name="mapPostsList">
+  <div id="map">
+    <div id="map-canvas"></div>
+  </div>
+</template>
