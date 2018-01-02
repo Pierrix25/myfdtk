@@ -159,7 +159,7 @@ Template.uploadedFiles.helpers({
         
 //    console.log('rendered: allFoodTrucks.count()= '+allFoodTrucks.count());
 //    allFoodTrucks.forEach(function (foodTruck) {
-   FoodTrucks.find({}).forEach( function(foodTruck) {
+/*   FoodTrucks.find({}).forEach( function(foodTruck) {
        console.log('rendered: boucle foodTruck.nom = :'+foodTruck.nom);
        var marker = new google.maps.Marker({
         position: new google.maps.LatLng(foodTruck.locationLat, foodTruck.locationLon),
@@ -169,7 +169,32 @@ Template.uploadedFiles.helpers({
     
     console.log('rendered: allFoodTrucks.forEach : foodTruck.nom = ' + foodTruck.nom + ' myLat=' +  foodTruck.locationLat + ' myLon=' + foodTruck.locationLon);
     marker.setMap(map);
-    });  
+    }); 
+*/
+        
+var markers = {};
+FoodTrucks.find().observe({
+        added: function (foodTruck) {
+    console.log('added: allFoodTrucks.observe : foodTruck.nom = ' + foodTruck.nom + ' myLat=' +  foodTruck.locationLat + ' myLon=' + foodTruck.locationLon);
+        var marker = new google.maps.Marker({
+        position: new google.maps.LatLng(foodTruck.locationLat, foodTruck.locationLon),
+        title: foodTruck.nom,
+        postId: foodTruck._id,
+        map: map,
+          });
+          markers[document._id] = marker;
+        },
+        changed: function (foodTruck, oldDocument) {
+    console.log('changed: allFoodTrucks.observe : foodTruck.nom = ' + foodTruck.nom + ' myLat=' +  foodTruck.locationLat + ' myLon=' + foodTruck.locationLon);
+          markers[foodTruck._id].setPosition({ lat: foodTruck.locationLat, lng: foodTruck.locationLon });
+        },
+        removed: function (foodTruck) {
+   console.log('removed: allFoodTrucks.observe : foodTruck.nom = ' + foodTruck.nom + ' myLat=' +  foodTruck.locationLat + ' myLon=' + foodTruck.locationLon);
+           markers[foodTruck._id].setMap(null);
+//          google.maps.event.clearInstanceListeners(markers[foodTruck._id]);
+          delete markers[foodTruck._id];
+        }
+      });
 
 
 // Je demande à ce que la carte soit centrée sur ma position
